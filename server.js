@@ -75,6 +75,9 @@ const { fork } = require('child_process');
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
 
+//Gzip
+const compression = require('compression')
+
 
 //Inicio de servidor
 const app = express();
@@ -95,6 +98,7 @@ app.use(session({
     saveUninitialized: true,
     cookie: { maxAge: 60000 }
 }));
+app.use(compression());
 
 
 let sqlProductos = new ClienteSQL(optionsMariaDB, "productos");
