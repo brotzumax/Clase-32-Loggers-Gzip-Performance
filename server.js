@@ -78,6 +78,18 @@ const numCPUs = require('os').cpus().length;
 //Gzip
 const compression = require('compression')
 
+//Winston
+const winston = require('winston');
+
+const logger = winston.createLogger({
+    level: 'verbose',
+    transports: [
+        new winston.transports.Console({ level: 'info' }),
+        new winston.transports.File({ filename: 'warn.log', level: 'warn' }),
+        new winston.transports.File({ filename: 'error.log', level: 'error' })
+    ]
+});
+
 
 //Inicio de servidor
 const app = express();
@@ -98,7 +110,15 @@ app.use(session({
     saveUninitialized: true,
     cookie: { maxAge: 60000 }
 }));
+
 app.use(compression());
+
+
+//Middleware winston
+app.use((req, res, next) => {
+    logger.info(`Request to ${req.url} - Method: ${req.method}`);
+    next();
+});
 
 
 let sqlProductos = new ClienteSQL(optionsMariaDB, "productos");
@@ -147,7 +167,7 @@ app.get("/info", (req, res) => {
     );
 });
 
-app.get("/api/randoms", (req, res) => {
+/* app.get("/api/randoms", (req, res) => {
     let cantidadNumeros = Number(req.query.cant);
     const calculo = fork('numerosRandom.js');
 
@@ -158,7 +178,13 @@ app.get("/api/randoms", (req, res) => {
             res.json(resultado);
         }
     });
-})
+}); */
+
+//Midleware para peticiones no encontradas
+app.use((req, res) => {
+    logger.warn(`Petición ${req.url} no encontrada`);
+    res.status(404).send('Página no encontrada');
+});
 
 //Websocket
 io.on('connection', function (socket) {
@@ -179,7 +205,7 @@ io.on('connection', function (socket) {
             const mensajesNormalizados = normalize(chat, mensajeria);
             io.sockets.emit('mensajes', mensajesNormalizados);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => logger.error(err));
 
 
 
@@ -204,7 +230,7 @@ io.on('connection', function (socket) {
                 const mensajesNormalizados = normalize(chat, mensajeria);
                 io.sockets.emit('mensajes', mensajesNormalizados);
             })
-            .catch((err) => console.log(err));
+            .catch((err) => logger.error(err));
     })
 });
 
