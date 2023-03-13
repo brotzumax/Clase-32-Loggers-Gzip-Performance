@@ -12,3 +12,9 @@ function getLogout(req, res) {
     res.render("pages/logout", { username: req.session.user });
     req.session.destroy();
 }
+
+export default {
+    getLogin,
+    postLogin,
+    getLogout
+}
