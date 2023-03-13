@@ -49,7 +49,7 @@ function sessionPersistence(req, res, next) {
         req.session.touch();
         next();
     } else {
-        res.redirect("/login");
+        res.redirect("/session/login");
     }
 }
 
@@ -124,22 +124,11 @@ let sqlProductos = new ClienteSQL(optionsMariaDB, "productos");
 //Ejs
 app.set('view engine', 'ejs');
 
+//Routes
+import sessionRouter from './routes/sessionRouter.js';
+app.use('/session', sessionRouter);
+
 //Peticiones del servidor
-app.get("/login", (req, res) => {
-    res.render("pages/login");
-});
-
-app.post("/login", (req, res) => {
-    const username = req.body.txtUsuario;
-    req.session.user = username;
-    res.redirect('/');
-});
-
-app.get("/logout", (req, res) => {
-    res.render("pages/logout", { username: req.session.user });
-    req.session.destroy();
-});
-
 app.get("/", sessionPersistence, (req, res) => {
     res.render("pages/index", { username: req.session.user });
 });
