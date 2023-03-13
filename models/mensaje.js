@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const mensajeSchema = new mongoose.Schema({
     author: { type: Object, require: true },
@@ -6,4 +6,4 @@ const mensajeSchema = new mongoose.Schema({
     date: { type: String }
 })
 
-module.exports = mongoose.model('Mensaje', mensajeSchema);
+export const modeloMensaje = mongoose.model('Mensaje', mensajeSchema);

@@ -1,20 +1,20 @@
 //Requisitos
-const express = require('express');
-const fs = require('fs');
-const { Server: HttpServer } = require('http');
-const { Server: IOServer } = require('socket.io');
-const ClienteSQL = require('./db/sqlContainer').ClienteSQL;
-const optionsMariaDB = require('./options/mysqlconn').options;
+import express from 'express';
+import fs from 'fs';
+import { Server as HttpServer } from 'http';
+import { Server as IOServer } from 'socket.io';
+import { ClienteSQL } from './db/sqlContainer.js';
+import { options as optionsMariaDB } from './options/mysqlconn.js';
 
 //MongoDB
-const mongoose = require('mongoose');
-const mongoConfig = require('./options/mongodbconn').options;
-const modelMensaje = require('./models/mensaje');
+import mongoose from 'mongoose';
+import { options as mongoConfig } from './options/mongodbconn.js';
+import { modeloMensaje } from './models/mensaje.js';
 
 
 //Normalizr
-const normalizr = require('normalizr');
-const util = require('util');
+import normalizr from 'normalizr';
+import util from 'util';
 
 const normalize = normalizr.normalize;
 const schema = normalizr.schema;
@@ -26,20 +26,16 @@ const mensajeria = new schema.Entity('mensajeria', { messages: [message] }, { id
 
 
 //Cookies
-const cookieParser = require('cookie-parser');
+import cookieParser from 'cookie-parser';
 
 
 //Session
-const session = require('express-session');
-const MongoStore = require('connect-mongo');
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
 const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };
 
 
 //Métodos
-function print(objeto) {
-    console.log(util.inspect(objeto, false, 12, true));
-}
-
 function convertirArray(array) {
     let nuevoArray = [];
     for (mensaje of array) {
@@ -59,27 +55,28 @@ function sessionPersistence(req, res, next) {
 
 
 //.env
-require('dotenv').config();
+import 'dotenv/config';
 
 
 //Minimist
-const parseArgs = require('minimist');
+import minimist from 'minimist';
 const argsOptions = { alias: { p: 'puerto', m: 'modo' }, default: { puerto: 8080, modo: "FORK" } };
-const args = parseArgs(process.argv.slice(2), argsOptions);
+const args = minimist(process.argv.slice(2), argsOptions);
 
 
 //Fork
-const { fork } = require('child_process');
+import { fork } from 'child_process';
 
 //Cluster
-const cluster = require('cluster');
-const numCPUs = require('os').cpus().length;
+import cluster from 'cluster';
+import os from 'os';
+const numCPUs = os.cpus().length;
 
 //Gzip
-const compression = require('compression')
+import compression from 'compression';
 
 //Winston
-const winston = require('winston');
+import winston from 'winston';
 
 const logger = winston.createLogger({
     level: 'verbose',
@@ -194,19 +191,6 @@ app.get("/bloqInfo", (req, res) => {
     );
 });
 
-/* app.get("/api/randoms", (req, res) => {
-    let cantidadNumeros = Number(req.query.cant);
-    const calculo = fork('numerosRandom.js');
-
-    calculo.on('message', resultado => {
-        if (resultado == "Listo") {
-            calculo.send(cantidadNumeros);
-        } else {
-            res.json(resultado);
-        }
-    });
-}); */
-
 //Midleware para peticiones no encontradas
 app.use((req, res) => {
     logger.warn(`Petición ${req.url} no encontrada`);
@@ -223,7 +207,7 @@ io.on('connection', function (socket) {
 
     mongoose.set('strictQuery', true);
     mongoose.connect("mongodb://localhost:27017/mensajeria", mongoConfig)
-        .then(() => modelMensaje.find({}))
+        .then(() => modeloMensaje.find({}))
         .then(data => {
             const chat = {
                 id: "mensajes",
@@ -246,9 +230,9 @@ io.on('connection', function (socket) {
     socket.on("nuevo-mensaje", message => {
         mongoose.set('strictQuery', true);
         mongoose.connect("mongodb://localhost:27017/mensajeria", mongoConfig)
-            .then(() => modelMensaje.create(message))
+            .then(() => modeloMensaje.create(message))
             .then(() => console.log("Mensaje guardado"))
-            .then(() => modelMensaje.find({}))
+            .then(() => modeloMensaje.find({}))
             .then(data => {
                 const chat = {
                     id: "mensajes",

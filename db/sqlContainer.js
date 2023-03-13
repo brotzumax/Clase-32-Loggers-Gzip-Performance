@@ -1,6 +1,6 @@
-const knex = require('knex');
+import knex from "knex";
 
-class ClienteSQL {
+export class ClienteSQL {
     constructor(options, tableName) {
         this.knex = knex(options);
         this.tableName = tableName;
@@ -60,5 +60,3 @@ class ClienteSQL {
             .finally(() => this.knex.destroy());
     }
 }
-
-module.exports = { ClienteSQL };

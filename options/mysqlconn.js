@@ -1,6 +1,6 @@
-require('dotenv').config();
+import 'dotenv/config';
 
-const options = {
+export const options = {
     client: process.env.CLIENT,
     connection: {
         host: process.env.HOST,
@@ -9,5 +9,3 @@ const options = {
         database: process.env.DATABASE_NAME
     }
 }
-
-module.exports = { options };

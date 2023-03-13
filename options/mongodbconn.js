@@ -1,6 +1,4 @@
-const options = {
+export const options = {
     useNewUrlParser: true,
     useUnifiedTopology: true
 };
-
-module.exports = { options };
