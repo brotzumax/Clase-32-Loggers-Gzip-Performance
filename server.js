@@ -2,13 +2,14 @@
 import express from 'express';
 import { Server as HttpServer } from 'http';
 import { Server as IOServer } from 'socket.io';
-import { ClienteSQL } from './db/sqlContainer.js';
 import { options as optionsMariaDB } from './options/mysqlconn.js';
 
 //MongoDB
-import mongoose from 'mongoose';
-import { options as mongoConfig } from './options/mongodbconn.js';
-import { modeloMensaje } from './models/mensaje.js';
+import { getAllMessages, newMessage } from "./persistence/mongooseMessages.js";
+
+//Cliente SQL
+import { ClienteSQL } from './db/sqlContainer.js';
+let sqlProductos = new ClienteSQL(optionsMariaDB, "productos");
 
 //Normalizr
 import normalizr from 'normalizr';
@@ -27,15 +28,6 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };
-
-//Métodos
-function convertirArray(array) {
-    let nuevoArray = [];
-    for (mensaje of array) {
-        nuevoArray.push({ id: mensaje._id.toString(), author: mensaje.author, text: mensaje.text, date: mensaje.date });
-    };
-    return nuevoArray;
-}
 
 //.env
 import 'dotenv/config';
@@ -86,8 +78,6 @@ app.use(compression());
 //Middleware winston
 app.use(winstonControllers.getUrlInfo);
 
-let sqlProductos = new ClienteSQL(optionsMariaDB, "productos");
-
 //Routes
 import sessionRouter from './routes/sessionRouter.js';
 import homeRouter from './routes/homeRouter.js';
@@ -101,25 +91,16 @@ app.use(winstonControllers.urlNotFound);
 
 //Websocket
 io.on('connection', function (socket) {
-    console.log("Cliente conectado");
-
     sqlProductos = new ClienteSQL(optionsMariaDB, "productos");
     sqlProductos.obtenerProductos()
         .then(productos => socket.emit('productos', productos));
 
-    mongoose.set('strictQuery', true);
-    mongoose.connect("mongodb://localhost:27017/mensajeria", mongoConfig)
-        .then(() => modeloMensaje.find({}))
-        .then(data => {
-            const chat = {
-                id: "mensajes",
-                messages: convertirArray(data)
-            };
+    getAllMessages()
+        .then(chat => {
             const mensajesNormalizados = normalize(chat, mensajeria);
             io.sockets.emit('mensajes', mensajesNormalizados);
         })
         .catch((err) => logger.error(err));
-
 
 
     socket.on("nuevo-producto", producto => {
@@ -130,16 +111,8 @@ io.on('connection', function (socket) {
     });
 
     socket.on("nuevo-mensaje", message => {
-        mongoose.set('strictQuery', true);
-        mongoose.connect("mongodb://localhost:27017/mensajeria", mongoConfig)
-            .then(() => modeloMensaje.create(message))
-            .then(() => console.log("Mensaje guardado"))
-            .then(() => modeloMensaje.find({}))
-            .then(data => {
-                const chat = {
-                    id: "mensajes",
-                    messages: convertirArray(data)
-                };
+        newMessage(message)
+            .then(chat => {
                 const mensajesNormalizados = normalize(chat, mensajeria);
                 io.sockets.emit('mensajes', mensajesNormalizados);
             })
