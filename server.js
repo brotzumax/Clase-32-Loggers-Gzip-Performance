@@ -5,7 +5,7 @@ import { Server as IOServer } from 'socket.io';
 import { options as optionsMariaDB } from './options/mysqlconn.js';
 
 //MongoDB
-import { getAllMessages, newMessage } from "./persistence/mongooseMessages.js";
+import mongooseMessages from "./persistence/mongooseMessages.js";
 
 //Cliente SQL
 import { ClienteSQL } from './db/sqlContainer.js';
@@ -86,12 +86,8 @@ io.on('connection', function (socket) {
     sqlProductos.obtenerProductos()
         .then(productos => socket.emit('productos', productos));
 
-    getAllMessages()
-        .then(chat => {
-            const mensajesNormalizados = normalizrServices.normalize(chat, normalizrServices.mensajeria);
-            io.sockets.emit('mensajes', mensajesNormalizados);
-        })
-        .catch((err) => logger.error(err));
+    const mensajesNormalizados = normalizrServices.normalize(mongooseMessages.getAllMessages(), normalizrServices.mensajeria);
+    io.sockets.emit('mensajes', mensajesNormalizados);
 
 
     socket.on("nuevo-producto", producto => {
@@ -102,12 +98,8 @@ io.on('connection', function (socket) {
     });
 
     socket.on("nuevo-mensaje", message => {
-        newMessage(message)
-            .then(chat => {
-                const mensajesNormalizados = normalizrServices.normalize(chat, normalizrServices.mensajeria);
-                io.sockets.emit('mensajes', mensajesNormalizados);
-            })
-            .catch((err) => logger.error(err));
+        const mensajesNormalizados = normalizrServices.normalize(mongooseMessages.newMessage(message), normalizrServices.mensajeria);
+        io.sockets.emit('mensajes', mensajesNormalizados);
     })
 });
 

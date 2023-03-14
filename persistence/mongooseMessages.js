@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import options from "../options/mongodbconn.js";
-import mensajeModel from './models/mensaje.js';
+import mensajeModel from '../models/mensaje.js';
 
 function convertirArray(array) {
     let nuevoArray = [];
