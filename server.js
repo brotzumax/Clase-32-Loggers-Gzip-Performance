@@ -1,6 +1,5 @@
 //Requisitos
 import express from 'express';
-import fs from 'fs';
 import { Server as HttpServer } from 'http';
 import { Server as IOServer } from 'socket.io';
 import { ClienteSQL } from './db/sqlContainer.js';
@@ -11,11 +10,8 @@ import mongoose from 'mongoose';
 import { options as mongoConfig } from './options/mongodbconn.js';
 import { modeloMensaje } from './models/mensaje.js';
 
-
 //Normalizr
 import normalizr from 'normalizr';
-import util from 'util';
-
 const normalize = normalizr.normalize;
 const schema = normalizr.schema;
 
@@ -24,16 +20,13 @@ const author = new schema.Entity('authors', {}, { idAttribute: 'email' });
 const message = new schema.Entity('messages', { author: author }, { idAttribute: 'id' });
 const mensajeria = new schema.Entity('mensajeria', { messages: [message] }, { idAttribute: 'id' });
 
-
 //Cookies
 import cookieParser from 'cookie-parser';
-
 
 //Session
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };
-
 
 //Métodos
 function convertirArray(array) {
@@ -44,21 +37,13 @@ function convertirArray(array) {
     return nuevoArray;
 }
 
-
-
-
 //.env
 import 'dotenv/config';
-
 
 //Minimist
 import minimist from 'minimist';
 const argsOptions = { alias: { p: 'puerto', m: 'modo' }, default: { puerto: 8080, modo: "FORK" } };
 const args = minimist(process.argv.slice(2), argsOptions);
-
-
-//Fork
-import { fork } from 'child_process';
 
 //Cluster
 import cluster from 'cluster';
@@ -68,22 +53,18 @@ import numCPUs from './services/osServices.js';
 import compression from 'compression';
 
 //Winston
-import winston from 'winston';
+import logger from './services/winstonServices.js';
+import winstonControllers from './controllers/winstonControllers.js';
 
-const logger = winston.createLogger({
-    level: 'verbose',
-    transports: [
-        new winston.transports.Console({ level: 'info' }),
-        new winston.transports.File({ filename: 'warn.log', level: 'warn' }),
-        new winston.transports.File({ filename: 'error.log', level: 'error' })
-    ]
-});
+
 
 
 //Inicio de servidor
 const app = express();
 const httpServer = new HttpServer(app);
 const io = new IOServer(httpServer);
+
+app.set('view engine', 'ejs');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -102,19 +83,10 @@ app.use(session({
 
 app.use(compression());
 
-
 //Middleware winston
-app.use((req, res, next) => {
-    logger.info(`Request to ${req.url} - Method: ${req.method}`);
-    next();
-});
-
+app.use(winstonControllers.getUrlInfo);
 
 let sqlProductos = new ClienteSQL(optionsMariaDB, "productos");
-
-
-//Ejs
-app.set('view engine', 'ejs');
 
 //Routes
 import sessionRouter from './routes/sessionRouter.js';
@@ -125,10 +97,7 @@ app.use('/home', homeRouter);
 app.use('/info', infoRouter);
 
 //Midleware para peticiones no encontradas
-app.use((req, res) => {
-    logger.warn(`Petición ${req.url} no encontrada`);
-    res.redirect("/home");
-});
+app.use(winstonControllers.urlNotFound);
 
 //Websocket
 io.on('connection', function (socket) {
