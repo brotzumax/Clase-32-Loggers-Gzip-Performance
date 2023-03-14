@@ -62,8 +62,7 @@ import { fork } from 'child_process';
 
 //Cluster
 import cluster from 'cluster';
-import os from 'os';
-const numCPUs = os.cpus().length;
+import numCPUs from './services/osServices.js';
 
 //Gzip
 import compression from 'compression';
@@ -120,52 +119,10 @@ app.set('view engine', 'ejs');
 //Routes
 import sessionRouter from './routes/sessionRouter.js';
 import homeRouter from './routes/homeRouter.js';
+import infoRouter from './routes/infoRouter.js';
 app.use('/session', sessionRouter);
 app.use('/home', homeRouter);
-
-//Peticiones del servidor
-app.get("/info", (req, res) => {
-    res.send(
-        "<h1>Información de la aplicación</h1>" +
-        "<div style='display: flex; flex-direction: column'>" +
-        "<span>Argumentos de entrada: -p (puerto), -m (modo: FORK - CLUSTER)</span>" +
-        `<span>Nombre de la plataforma: ${process.platform}</span>` +
-        `<span>Versión de node.js: ${process.version}</span>` +
-        `<span>Memoria total reservada (rss): ${process.memoryUsage().rss}</span>` +
-        `<span>Path de ejecución:  ${process.execPath}</span>` +
-        `<span>Process id: ${process.pid}</span>` +
-        `<span>Carpeta del proyecto: ${process.cwd()}</span>` +
-        `<span>Número de procesadores: ${numCPUs}</span>` +
-        "</div>"
-    );
-});
-
-const processInfo = {
-    platform: process.platform,
-    version: process.version,
-    memoryUsage: process.memoryUsage().rss,
-    execPath: process.execPath,
-    pid: process.pid,
-    cwd: process.cwd(),
-    numCPUs: numCPUs,
-}
-
-app.get("/bloqInfo", (req, res) => {
-    console.log(processInfo);
-    res.send(
-        "<h1>Información de la aplicación</h1>" +
-        "<div style='display: flex; flex-direction: column'>" +
-        "<span>Argumentos de entrada: -p (puerto), -m (modo: FORK - CLUSTER)</span>" +
-        `<span>Nombre de la plataforma: ${process.platform}</span>` +
-        `<span>Versión de node.js: ${process.version}</span>` +
-        `<span>Memoria total reservada (rss): ${process.memoryUsage().rss}</span>` +
-        `<span>Path de ejecución:  ${process.execPath}</span>` +
-        `<span>Process id: ${process.pid}</span>` +
-        `<span>Carpeta del proyecto: ${process.cwd()}</span>` +
-        `<span>Número de procesadores: ${numCPUs}</span>` +
-        "</div>"
-    );
-});
+app.use('/info', infoRouter);
 
 //Midleware para peticiones no encontradas
 app.use((req, res) => {
