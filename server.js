@@ -12,14 +12,7 @@ import { ClienteSQL } from './db/sqlContainer.js';
 let sqlProductos = new ClienteSQL(optionsMariaDB, "productos");
 
 //Normalizr
-import normalizr from 'normalizr';
-const normalize = normalizr.normalize;
-const schema = normalizr.schema;
-
-//Esquemas normalizacion
-const author = new schema.Entity('authors', {}, { idAttribute: 'email' });
-const message = new schema.Entity('messages', { author: author }, { idAttribute: 'id' });
-const mensajeria = new schema.Entity('mensajeria', { messages: [message] }, { idAttribute: 'id' });
+import normalizrServices from './services/normalizrServices.js';
 
 //Cookies
 import cookieParser from 'cookie-parser';
@@ -47,8 +40,6 @@ import compression from 'compression';
 //Winston
 import logger from './services/winstonServices.js';
 import winstonControllers from './controllers/winstonControllers.js';
-
-
 
 
 //Inicio de servidor
@@ -97,7 +88,7 @@ io.on('connection', function (socket) {
 
     getAllMessages()
         .then(chat => {
-            const mensajesNormalizados = normalize(chat, mensajeria);
+            const mensajesNormalizados = normalizrServices.normalize(chat, normalizrServices.mensajeria);
             io.sockets.emit('mensajes', mensajesNormalizados);
         })
         .catch((err) => logger.error(err));
@@ -113,7 +104,7 @@ io.on('connection', function (socket) {
     socket.on("nuevo-mensaje", message => {
         newMessage(message)
             .then(chat => {
-                const mensajesNormalizados = normalize(chat, mensajeria);
+                const mensajesNormalizados = normalizrServices.normalize(chat, normalizrServices.mensajeria);
                 io.sockets.emit('mensajes', mensajesNormalizados);
             })
             .catch((err) => logger.error(err));
