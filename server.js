@@ -44,14 +44,7 @@ function convertirArray(array) {
     return nuevoArray;
 }
 
-function sessionPersistence(req, res, next) {
-    if (req.session.user) {
-        req.session.touch();
-        next();
-    } else {
-        res.redirect("/session/login");
-    }
-}
+
 
 
 //.env
@@ -126,17 +119,11 @@ app.set('view engine', 'ejs');
 
 //Routes
 import sessionRouter from './routes/sessionRouter.js';
+import homeRouter from './routes/homeRouter.js';
 app.use('/session', sessionRouter);
+app.use('/home', homeRouter);
 
 //Peticiones del servidor
-app.get("/", sessionPersistence, (req, res) => {
-    res.render("pages/index", { username: req.session.user });
-});
-
-app.get("/api/productos-test", sessionPersistence, (req, res) => {
-    res.render("pages/testView");
-});
-
 app.get("/info", (req, res) => {
     res.send(
         "<h1>Información de la aplicación</h1>" +
@@ -183,7 +170,7 @@ app.get("/bloqInfo", (req, res) => {
 //Midleware para peticiones no encontradas
 app.use((req, res) => {
     logger.warn(`Petición ${req.url} no encontrada`);
-    res.status(404).send('Página no encontrada');
+    res.redirect("/home");
 });
 
 //Websocket

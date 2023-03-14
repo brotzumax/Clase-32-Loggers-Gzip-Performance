@@ -13,8 +13,18 @@ function getLogout(req, res) {
     req.session.destroy();
 }
 
+function sessionPersistence(req, res, next) {
+    if (req.session.user) {
+        req.session.touch();
+        next();
+    } else {
+        res.redirect("/session/login");
+    }
+}
+
 export default {
     getLogin,
     postLogin,
-    getLogout
+    getLogout,
+    sessionPersistence
 }
