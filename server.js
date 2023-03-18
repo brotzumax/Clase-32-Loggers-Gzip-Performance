@@ -2,14 +2,12 @@
 import express from 'express';
 import { Server as HttpServer } from 'http';
 import { Server as IOServer } from 'socket.io';
-import { options as optionsMariaDB } from './options/mysqlconn.js';
 
 //MongoDB
 import mongooseMessages from "./persistence/mongooseMessages.js";
 
 //Cliente SQL
-import { ClienteSQL } from './db/sqlContainer.js';
-let sqlProductos = new ClienteSQL(optionsMariaDB, "productos");
+import dataServices from './services/dataServices.js';
 
 //Normalizr
 import normalizrServices from './services/normalizrServices.js';
@@ -38,7 +36,6 @@ import numCPUs from './services/osServices.js';
 import compression from 'compression';
 
 //Winston
-import logger from './services/winstonServices.js';
 import winstonControllers from './controllers/winstonControllers.js';
 
 
@@ -81,20 +78,17 @@ app.use('/info', infoRouter);
 app.use(winstonControllers.urlNotFound);
 
 //Websocket
-io.on('connection', function (socket) {
-    sqlProductos = new ClienteSQL(optionsMariaDB, "productos");
-    sqlProductos.obtenerProductos()
-        .then(productos => socket.emit('productos', productos));
+io.on('connection', async function (socket) {
+    const productos = await dataServices.getProducts();
+    socket.emit('productos', productos);
 
     const mensajesNormalizados = normalizrServices.normalize(mongooseMessages.getAllMessages(), normalizrServices.mensajeria);
     io.sockets.emit('mensajes', mensajesNormalizados);
 
 
-    socket.on("nuevo-producto", producto => {
-        sqlProductos = new ClienteSQL(optionsMariaDB, "productos");
-        sqlProductos.insertarElemento(producto)
-            .then(() => sqlProductos.obtenerProductos())
-            .then(productos => socket.emit('productos', productos));
+    socket.on("nuevo-producto", async producto => {
+        const productos = await dataServices.getProducts(producto);
+        socket.emit('productos', productos);
     });
 
     socket.on("nuevo-mensaje", message => {
