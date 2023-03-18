@@ -1,9 +1,10 @@
 import knex from "knex";
+import { options } from "../options/mysqlconn";
 
 export class ClienteSQL {
-    constructor(options, tableName) {
-        this.knex = knex(options);
+    constructor(tableName) {
         this.tableName = tableName;
+        this.knex = knex(options);
     }
 
     crearTablaProductos() {
