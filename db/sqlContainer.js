@@ -1,5 +1,5 @@
 import knex from "knex";
-import { options } from "../options/mysqlconn";
+import options from "../options/mysqlconn.js";
 
 export class ClienteSQL {
     constructor(tableName) {
