@@ -1,10 +1,11 @@
 import knex from "knex";
 import options from "../options/mysqlconn.js";
 
-export class ClienteSQL {
+let instance = null;
+
+class ClienteSQL {
     constructor(tableName) {
         this.tableName = tableName;
-        this.knex = knex(options);
     }
 
     crearTablaProductos() {
@@ -29,35 +30,20 @@ export class ClienteSQL {
             .catch(err => console.log(err));
     }
 
-    insertarElemento(producto) {
-        return this.knex(this.tableName).insert(producto)
-            .then(() => console.log("Elemento añadido"))
-            .catch(err => console.log(err));
+    static getInstance(tablename) {
+        if (!instance) {
+            instance = new ClienteSQL(tableName);
+        }
+        return instance;
     }
 
-    obtenerProductos() {
-        let productos = [];
-        return this.knex.from(this.tableName).select("*")
-            .then(rows => {
-                for (let row of rows) {
-                    productos.push({ title: row['title'], price: row['price'], thumbnail: row['thumbnail'] });
-                }
-                return productos;
-            })
-            .catch(err => console.log(err))
-            .finally(() => this.knex.destroy());
+    async destroyKnex() {
+        await this.knex.destroy();
     }
 
-    obtenerMensajes() {
-        let mensajes = [];
-        return this.knex.from(this.tableName).select("*")
-            .then(rows => {
-                for (let row of rows) {
-                    mensajes.push({ text: row['text'], email: row['email'], date: row['date'] });
-                }
-                return mensajes;
-            })
-            .catch(err => console.log(err))
-            .finally(() => this.knex.destroy());
+    async newKnex() {
+        this.knex = await knex(options);
     }
 }
+
+export default ClienteSQL;
