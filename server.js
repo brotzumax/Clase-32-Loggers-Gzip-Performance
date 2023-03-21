@@ -6,9 +6,6 @@ import { Server as IOServer } from 'socket.io';
 //MongoDB
 import mongooseMessages from "./persistence/mongooseMessages.js";
 
-//Cliente SQL
-import dataServices from './services/dataServices.js';
-
 //Normalizr
 import normalizrServices from './services/normalizrServices.js';
 
@@ -37,6 +34,9 @@ import compression from 'compression';
 
 //Winston
 import winstonControllers from './controllers/winstonControllers.js';
+
+//Productos Api
+import ProductosApi from './services/ProductosAPI.js';
 
 
 //Inicio de servidor
@@ -77,9 +77,12 @@ app.use('/info', infoRouter);
 //Midleware para peticiones no encontradas
 app.use(winstonControllers.urlNotFound);
 
+//Productos API
+const productosApi = new ProductosApi();
+
 //Websocket
 io.on('connection', async function (socket) {
-    const productos = await dataServices.getProducts();
+    const productos = await productosApi.getProducts();
     socket.emit('productos', productos);
 
     const mensajesNormalizados = normalizrServices.normalize(mongooseMessages.getAllMessages(), normalizrServices.mensajeria);
@@ -87,7 +90,7 @@ io.on('connection', async function (socket) {
 
 
     socket.on("nuevo-producto", async producto => {
-        const productos = await dataServices.getProducts(producto);
+        const productos = await productosApi.getProducts(producto);
         socket.emit('productos', productos);
     });
 
