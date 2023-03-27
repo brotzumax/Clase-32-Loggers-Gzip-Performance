@@ -1,15 +1,15 @@
-import ProductosDao from "../db/productosDao.js";
+import ProductosRepo from "../db/productosRepo.js";
 
 class ProductosApi {
     constructor() {
-        this.productosDao = new ProductosDao();
+        this.productosRepo = new ProductosRepo();
     }
 
     async getProducts(product) {
         if (product) {
-            await this.productosDao.add(product);
+            await this.productosRepo.add(product);
         }
-        const products = await this.productosDao.getAll();
+        const products = await this.productosRepo.getAll();
         return products;
     }
 }
