@@ -32,7 +32,7 @@ class ClienteSQL {
 
     static getInstance(tablename) {
         if (!instance) {
-            instance = new ClienteSQL(tableName);
+            instance = new ClienteSQL(tablename);
         }
         return instance;
     }
