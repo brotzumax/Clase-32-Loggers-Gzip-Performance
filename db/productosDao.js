@@ -32,6 +32,30 @@ class ProductosDao {
             this.clienteSQL.destroyKnex();
         }
     }
+
+    async update(id, productoActualizado) {
+        try {
+            this.clienteSQL.newKnex();
+            await this.clienteSQL.knex(this.clienteSQL.tableName).where({ id }).update(productoActualizado);
+            console.log("Producto actualizado con éxito");
+        } catch (error) {
+            console.log(error);
+        } finally {
+            this.clienteSQL.destroyKnex();
+        }
+    }
+
+    async delete(id) {
+        try {
+            this.clienteSQL.newKnex();
+            await this.clienteSQL.knex(this.clienteSQL.tableName).where({ id }).del();
+            console.log("Producto eliminado con éxito");
+        } catch (error) {
+            console.log(error);
+        } finally {
+            this.clienteSQL.destroyKnex();
+        }
+    }
 }
 
 export default ProductosDao;
