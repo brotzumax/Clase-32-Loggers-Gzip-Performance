@@ -4,7 +4,7 @@ import mensajeModel from '../models/mensaje.js';
 
 function convertirArray(array) {
     let nuevoArray = [];
-    for (mensaje of array) {
+    for (let mensaje of array) {
         nuevoArray.push({ id: mensaje._id.toString(), author: mensaje.author, text: mensaje.text, date: mensaje.date });
     };
     return nuevoArray;
@@ -12,10 +12,10 @@ function convertirArray(array) {
 
 function getAllMessages() {
     mongoose.set('strictQuery', true);
-    mongoose.connect("mongodb://localhost:27017/mensajeria", options)
+    return mongoose.connect("mongodb://localhost:27017/mensajeria", options)
         .then(() => mensajeModel.find({}))
         .then(data => {
-            return chat = {
+            return {
                 id: "mensajes",
                 messages: convertirArray(data)
             }
@@ -25,7 +25,7 @@ function getAllMessages() {
 
 function newMessage(message) {
     mongoose.set('strictQuery', true);
-    mongoose.connect("mongodb://localhost:27017/mensajeria", options)
+    return mongoose.connect("mongodb://localhost:27017/mensajeria", options)
         .then(() => mensajeModel.create(message))
         .then(() => console.log("Mensaje guardado"))
         .then(() => mensajeModel.find({}))
