@@ -12,6 +12,10 @@ class ProductosApi {
         const products = await this.productosRepo.getAll();
         return products;
     }
+
+    async updateProduct(data) {
+        await this.productosRepo.update(data.oldTitle, data.newProduct);
+    }
 }
 
 export default ProductosApi;
