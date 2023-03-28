@@ -1,15 +1,19 @@
+import ProductosDao from "./productosDao.js";
 import ProductosDaoFactory from "./productosDaoFactory.js";
 import ProductoDTO from "./productosDto.js";
 
 class ProductosRepo {
     constructor() {
-        this.dao = ProductosDaoFactory.getDao();
+        this.dao = new ProductosDao();
     }
 
     async getAll() {
         const dtos = [];
-        for (let dao of await this.dao.getAll()) {
-            dtos.push(new ProductoDTO(dao));
+        const daos = await this.dao.getAll();
+        if (daos) {
+            for (let dao of daos) {
+                dtos.push(new ProductoDTO(dao));
+            }
         }
         return dtos;
     }
