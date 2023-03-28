@@ -6,6 +6,9 @@ import { Server as IOServer } from 'socket.io';
 //MongoDB
 import mongooseMessages from "./persistence/mongooseMessages.js";
 
+//Productos API
+const productosApi = new ProductosApi();
+
 //Normalizr
 import normalizrServices from './services/normalizrServices.js';
 
@@ -74,19 +77,36 @@ app.use('/session', sessionRouter);
 app.use('/home', homeRouter);
 app.use('/info', infoRouter);
 
+//Axios Test
+app.get("/products/getAll", async (req, res) => {
+    try {
+        const productos = await productosApi.getProducts();
+        res.send(productos);
+    } catch (error) {
+        res.send({ error: error });
+    }
+});
+
+app.put("/products/update", async (req, res) => {
+    try {
+        const data = req.body;
+        await productosApi.updateProduct(data);
+        res.send({ status: "Producto actualizado" });
+    } catch (error) {
+        res.send({ error: error });
+    }
+});
+
 //Midleware para peticiones no encontradas
 app.use(winstonControllers.urlNotFound);
-
-//Productos API
-const productosApi = new ProductosApi();
 
 //Websocket
 io.on('connection', async function (socket) {
     const productos = await productosApi.getProducts();
     socket.emit('productos', productos);
 
-    const mensajesNormalizados = normalizrServices.normalize(mongooseMessages.getAllMessages(), normalizrServices.mensajeria);
-    io.sockets.emit('mensajes', mensajesNormalizados);
+    /* const mensajesNormalizados = normalizrServices.normalize(mongooseMessages.getAllMessages(), normalizrServices.mensajeria);
+    io.sockets.emit('mensajes', mensajesNormalizados); */
 
 
     socket.on("nuevo-producto", async producto => {
@@ -95,8 +115,8 @@ io.on('connection', async function (socket) {
     });
 
     socket.on("nuevo-mensaje", message => {
-        const mensajesNormalizados = normalizrServices.normalize(mongooseMessages.newMessage(message), normalizrServices.mensajeria);
-        io.sockets.emit('mensajes', mensajesNormalizados);
+        /* const mensajesNormalizados = normalizrServices.normalize(mongooseMessages.newMessage(message), normalizrServices.mensajeria);
+        io.sockets.emit('mensajes', mensajesNormalizados); */
     })
 });
 
