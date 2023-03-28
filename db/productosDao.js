@@ -33,10 +33,10 @@ class ProductosDao {
         }
     }
 
-    async update(id, productoActualizado) {
+    async update(title, productoActualizado) {
         try {
             await this.clienteSQL.newKnex();
-            await this.clienteSQL.knex(this.clienteSQL.tableName).where({ id }).update(productoActualizado);
+            await this.clienteSQL.knex(this.clienteSQL.tableName).where({ title }).update(productoActualizado);
             console.log("Producto actualizado con éxito");
         } catch (error) {
             console.log(error);
@@ -45,10 +45,10 @@ class ProductosDao {
         }
     }
 
-    async delete(id) {
+    async delete(title) {
         try {
             await this.clienteSQL.newKnex();
-            await this.clienteSQL.knex(this.clienteSQL.tableName).where({ id }).del();
+            await this.clienteSQL.knex(this.clienteSQL.tableName).where({ title }).del();
             console.log("Producto eliminado con éxito");
         } catch (error) {
             console.log(error);
