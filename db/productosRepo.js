@@ -22,6 +22,11 @@ class ProductosRepo {
         const dto = new ProductoDTO(product);
         await this.dao.add(dto);
     }
+
+    async update(title, newProduct) {
+        const dto = new ProductoDTO(newProduct);
+        await this.dao.update(title, dto);
+    }
 }
 
 export default ProductosRepo;
