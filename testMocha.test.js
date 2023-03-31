@@ -1,11 +1,10 @@
 import supertest from "supertest";
-import chai from "chai";
+import { expect } from "chai";
 import { describe } from "mocha";
 
 const request = supertest('http://localhost:8080');
-const expect = chai.expect;
 
-describe("Test api rest full"), () => {
+describe("Test api rest full", () => {
     describe("GET", () => {
         it("Debería retornar un status 200", async () => {
             let response = await request.get("/products/getAll")
@@ -28,5 +27,4 @@ describe("Test api rest full"), () => {
             expect(response.status).to.eql(200)
         })
     })
-}
-
+});
