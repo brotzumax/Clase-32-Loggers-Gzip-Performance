@@ -22,8 +22,27 @@ describe("Test api rest full", () => {
                     thumbnail: "www.XXXXXXXXXX.com"
                 }
             }
-
             let response = await request.put("/products/update").send(data)
+            expect(response.status).to.eql(200)
+        })
+    })
+
+    describe("POST", () => {
+        it("Debería añadir un producto", async () => {
+            let newProduct = {
+                title: "XXXXX",
+                price: 99999,
+                thumbnail: "www.XXXXXXXXXX.com"
+            }
+            let response = await request.post("/products/add").send(newProduct)
+            expect(response.status).to.eql(200)
+        })
+    })
+
+    describe("DELETE", () => {
+        it("Debería eliminar un producto", async () => {
+            let title = "XXXXX"
+            let response = await request.delete("/products/update").send(title);
             expect(response.status).to.eql(200)
         })
     })
