@@ -16,6 +16,10 @@ class ProductosApi {
     async updateProduct(data) {
         await this.productosRepo.update(data.oldTitle, data.newProduct);
     }
+
+    async deleteProduct(title) {
+        await this, this.productosRepo.delete(title);
+    }
 }
 
 export default ProductosApi;
