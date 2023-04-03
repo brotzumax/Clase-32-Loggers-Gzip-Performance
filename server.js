@@ -97,6 +97,26 @@ app.put("/products/update", async (req, res) => {
     }
 });
 
+app.post("/products/add", async (req, res) => {
+    try {
+        const product = req.body;
+        await productosApi.getProducts(product);
+        res.send({ status: "Producto añadido" });
+    } catch (error) {
+        res.send({ error: error });
+    }
+});
+
+app.delete("/products/delete", async (req, res) => {
+    try {
+        const title = req.body;
+        await productosApi.deleteProduct(title);
+        res.send({ status: "Producto eliminado" });
+    } catch (error) {
+        res.send({ error: error });
+    }
+});
+
 //Midleware para peticiones no encontradas
 app.use(winstonControllers.urlNotFound);
 
