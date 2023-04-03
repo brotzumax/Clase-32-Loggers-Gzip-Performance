@@ -27,6 +27,10 @@ class ProductosRepo {
         const dto = new ProductoDTO(newProduct);
         await this.dao.update(title, dto);
     }
+
+    async delete(title) {
+        await this.dao.delete(title);
+    }
 }
 
 export default ProductosRepo;
