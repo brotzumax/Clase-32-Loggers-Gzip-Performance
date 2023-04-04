@@ -41,6 +41,11 @@ import winstonControllers from './controllers/winstonControllers.js';
 //Productos Api
 import ProductosApi from './services/ProductosAPI.js';
 
+//GraphQL
+import schema from './graphql/graphqlSchema.js';
+import { graphqlHTTP } from 'express-graphql';
+import root from './graphql/graphqlRoot.js';
+
 
 //Inicio de servidor
 const app = express();
@@ -116,6 +121,13 @@ app.delete("/products/delete", async (req, res) => {
         res.send({ error: error });
     }
 });
+
+//GraphQL
+app.use('/graphql', graphqlHTTP({
+    schema: schema,
+    rootValue: root,
+    graphiql: true
+}));
 
 //Midleware para peticiones no encontradas
 app.use(winstonControllers.urlNotFound);
